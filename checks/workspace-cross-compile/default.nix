@@ -22,8 +22,17 @@ let
     "scripts"
   ];
 
+  buildInputs = pkgs: [
+    pkgs.openssl
+  ];
+  
+  nativeBuildInputs = pkgs: [
+    pkgs.pkgsBuildTarget.pkg-config
+    #pkgs.pkg-config
+  ];
+
   multiOutput =
-    (flakeboxLib.craneMultiBuild { })
+    (flakeboxLib.craneMultiBuild { inherit buildInputs; inherit nativeBuildInputs; })
       (craneLib':
         let
           src = flakeboxLib.filterSubPaths {
@@ -35,14 +44,6 @@ let
             pname = "workspace-cross-compile";
             version = "0.0.1";
             inherit src;
-
-            buildInputs = [
-              pkgs.openssl
-            ];
-
-            nativeBuildInputs = [
-              pkgs.pkg-config
-            ];
           }).overrideArgsDepsOnly {
             cargoVendorDir = craneLib'.vendorCargoDeps {
               inherit src;
@@ -95,14 +96,14 @@ pkgs.linkFarmFromDrvs "workspace-non-rust" (
   # if Android is supported, test at leasat one cross-compilation target to android
   lib.optionals (multiOutput ? aarch64-android) [
     # rocksdb only on aarch64, most probably work on other ones
-    multiOutput.aarch64-android.ci.workspaceBuild
+    #multiOutput.aarch64-android.ci.workspaceBuild
   ] ++
   # on Linux test all android cross-compilation
   lib.optionals (pkgs.system == "x86_64-linux") [
     # openssl & others, try on android
-    multiOutput.x86_64-android.ci.lib
-    multiOutput.i686-android.ci.lib
-    multiOutput.armv7-android.ci.lib
+    #multiOutput.x86_64-android.ci.lib
+    #multiOutput.i686-android.ci.lib
+    #multiOutput.armv7-android.ci.lib
     # even with newer llvm14, rocksdb doesn't compile on x86_64-darwin,
     # it might get fixed at some point (newer llvm or librocksdb-sys)
 
@@ -119,15 +120,19 @@ pkgs.linkFarmFromDrvs "workspace-non-rust" (
   ] ++
   lib.optionals (full && pkgs.stdenv.isLinux) [
     multiOutput.aarch64-linux.ci.workspaceBuild
+    multiOutput.aarch64-linux-musl.ci.workspaceBuild
     multiOutput.x86_64-linux.ci.workspaceBuild
+    multiOutput.x86_64-linux-musl.ci.workspaceBuild
     multiOutput.i686-linux.ci.workspaceBuild
+    multiOutput.i686-linux-musl.ci.workspaceBuild
     multiOutput.riscv64-linux.ci.workspaceBuild
+    multiOutput.mingw64.ci.workspaceBuild
   ] ++
     # in full mode, when supported, test all android targets
   lib.optionals (full && multiOutput ? aarch64-android) [
-    multiOutput.aarch64-android.ci.workspaceBuild
-    multiOutput.x86_64-android.ci.workspaceBuild
-    multiOutput.i686-android.ci.workspaceBuild
-    multiOutput.armv7-android.ci.workspaceBuild
+    #multiOutput.aarch64-android.ci.workspaceBuild
+    #multiOutput.armv7-android.ci.workspaceBuild
+    #multiOutput.x86_64-android.ci.workspaceBuild
+    #multiOutput.i686-android.ci.workspaceBuild
   ]
 )

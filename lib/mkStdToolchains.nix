@@ -159,16 +159,22 @@ in
     targets = {
       x86_64-android = stdTargets.x86_64-android;
     };
-    # no crossPkgs available
-    craneArgs = { };
+    # FIXME: no crossPkgs available, use native pkgs as a fallback
+    craneArgs = {
+      buildInputs = buildInputs pkgs.pkgsCross.armv7a-android-prebuilt;
+      nativeBuildInputs = nativeBuildInputs pkgs.pkgsCross.armv7a-android-prebuilt;
+    };
   };
   i686-android = mkFenixToolchain {
     defaultTarget = "i686-linux-android";
     targets = {
       i686-android = stdTargets.i686-android;
     };
-    # no crossPkgs available
-    craneArgs = { };
+    # FIXME: no crossPkgs available, use native pkgs as a fallback
+    craneArgs = {
+      buildInputs = buildInputs pkgs;
+      nativeBuildInputs = nativeBuildInputs pkgs;
+    };
   };
   armv7-android = mkFenixToolchain {
     defaultTarget = "armv7-linux-androideabi";
@@ -176,8 +182,8 @@ in
       armv7-android = stdTargets.armv7-android;
     };
     craneArgs = {
-      buildInputs = buildInputs pkgs.pkgsCross.armv7-android-prebuilt;
-      nativeBuildInputs = nativeBuildInputs pkgs.pkgsCross.armv7-android-prebuilt;
+      buildInputs = buildInputs pkgs.pkgsCross.armv7a-android-prebuilt;
+      nativeBuildInputs = nativeBuildInputs pkgs.pkgsCross.armv7a-android-prebuilt;
     };
   };
 
